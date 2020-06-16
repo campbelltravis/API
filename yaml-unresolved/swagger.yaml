@@ -1,0 +1,789 @@
+swagger: '2.0'
+info:
+  description: Request fulfillment of a shipment and status
+  version: "1.1.0" # Created new endpoints for shipment UI, Stats by shpments, and stats by carriers
+  title: Shipment Request API
+  # put the contact info for your development or API team
+  contact:
+    email: you@your-company.com
+
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+x-amazon-apigateway-request-validators:
+  full:
+    validateRequestBody: true
+    validateRequestParameters: true
+  body-only:
+    validateRequestBody: true
+    validateRequestParameters: false
+x-amazon-apigateway-request-validator: full
+paths:
+  /shipments/{orderNumber}:
+    get:
+      summary: View status of submitted shipment for fulfillment
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      parameters:
+      - in: query 
+        name: clientId
+        type: string
+        minLength: 3
+        maxLength: 3
+      - in: query
+        name: brandId
+        type: string
+        minLength: 2
+        maxLength: 2
+      - in: path
+        name: orderNumber
+        required: true
+        type: string
+        maxLength: 30
+      responses:
+        200:
+          description: shipment accepted
+          schema:
+            $ref: '#/definitions/shipmentStatus'
+        204:
+          description: shipment accepted
+          schema:
+            $ref: '#/definitions/shipmentStatus'            
+        400:
+          description: invalid input, object invalid
+        409:
+          description: request issues
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                description: Message to display when request there are conflict/existing resource
+        422:
+          description: request issues
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                description: Message to display when request has issue parsing date or invalid data is passed    
+  /shipments:
+    get:
+      summary: View status of submitted shipment for fulfillment
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      parameters:
+      - in: query         
+        name: startDate
+        type: string
+        format: date
+        required: true
+      - in: query 
+        name: endDate
+        type: string
+        required: true
+      - in: query 
+        name: orderNumber
+        type: string
+        maxLength: 30
+      - in: query 
+        name: shipmentNumber
+        type: string
+        maxLength: 30
+      - in: query 
+        name: trackingNumber
+        type: string
+        maxLength: 30
+      - in: query
+        name: page
+        type: integer 
+      - in: query
+        name: perPage
+        type: integer
+      - in: query
+        name: globalFilter
+        type: string 
+      responses:
+        200:
+          description: shipment accepted
+          schema:
+            $ref: '#/definitions/shipmentStatusList'
+        204:
+          description: shipment accepted
+          schema:
+            $ref: '#/definitions/shipmentStatusList'            
+        400:
+          description: invalid input, object invalid
+        409:
+          description: request issues
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                description: Message to display when request there are conflict/existing resource
+        422:
+          description: request issues
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                description: Message to display when request has issue parsing date or invalid data is passed  
+    post:
+      summary: adds new shipment for fulfillment
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      parameters:
+      - in: body
+        name: shipment
+        description: add shipment record to system
+        required: true
+        schema:
+          $ref: '#/definitions/shipmentRequest'
+      responses:
+        200:
+          description: shipment accepted
+          schema:
+            type: object
+            properties:
+              description:
+                type: string
+                description: Shipment accepted message
+        204:
+          description: shipment accepted
+          schema:
+            type: object
+            properties:
+              description:
+                type: string
+                description: Shipment accepted message                
+        400:
+          description: request not formatted correctly
+          schema:
+            type: object
+            properties:
+              description:
+                type: string
+                description: Message displayed when request is not formatted correctly       
+        409:
+          description: request issues
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                description: Message to display when request there are conflict/existing resource
+        422:
+          description: request issues
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                description: Message to display when request has issue parsing date or invalid data is passed      
+
+  /reporting/shipments/chart/status:
+    get:
+      summary: View status of submitted shipment for fulfillment
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      parameters:
+      - in: query 
+        name: startDate
+        required: true
+        type: string
+        format: date
+      - in: query 
+        name: endDate
+        required: true
+        type: string
+        format: date
+      - in: query
+        name: status
+        type: string
+        enum: [received,processing,shipped,voided,] # Need to Add or remove status
+      responses:
+        200:
+          description: shipment accepted
+          schema:
+            $ref: '#/definitions/stats'
+        204:
+          description: shipment accepted
+          schema:
+            $ref: '#/definitions/stats'            
+        400:
+          description: invalid input, object invalid
+        409:
+          description: request issues
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                description: Message to display when request there are conflict/existing resource
+        422:
+          description: request issues
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                description: Message to display when request has issue parsing date or invalid data is passed 
+  /reporting/shipments/chart/carriers:
+    get:
+      summary: View status of submitted shipment for fulfillment
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      parameters:
+      - in: query 
+        name: startDate
+        required: true
+        type: string
+        format: date
+      - in: query 
+        name: endDate
+        required: true
+        type: string
+        format: date
+      - in: query
+        name: carrierName
+        type: string
+      responses:
+        200:
+          description: shipment accepted
+          schema:
+            $ref: '#/definitions/carriers'
+        204:
+          description: shipment accepted
+          schema:
+            $ref: '#/definitions/carriers'            
+        400:
+          description: invalid input, object invalid
+        409:
+          description: request issues
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                description: Message to display when request there are conflict/existing resource
+        422:
+          description: request issues
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                description: Message to display when request has issue parsing date or invalid data is passed              
+definitions:
+  shipmentRequest:
+    required:
+    - orderDetails
+    - shippingAddress
+    - products
+    - shipping
+    type: object
+    properties:
+      clientId:
+        type: string
+      brandId:
+        type: string
+      orderDetails:
+        $ref: '#/definitions/orderDetails'
+      billingAddress:
+        $ref: '#/definitions/address'
+      shippingAddress:
+        $ref: '#/definitions/address'
+      products:
+        $ref: '#/definitions/products'
+      shipping:
+        $ref: '#/definitions/shipping'
+      messaging:
+        $ref: '#/definitions/messaging'
+      shipmentOptions:
+        $ref: '#/definitions/shipmentOptions'
+      customOptions:
+        $ref: '#/definitions/customOptions'  
+  orderDetails:
+    required:
+    - orderNumber
+    - orderDate
+    - orderTotal
+    properties:
+      customerNumber:
+        type: string
+        maxLength: 20
+      orderNumber:
+        type: string
+        maxLength: 30
+      shipmentNumber:
+        type: string
+        maxLength: 20
+      orderDate:
+        type: string
+        format: date-time
+      orderSH:
+        type: number
+        format: double
+        minimum: 0.00
+        maximum: 9999999.99
+      orderTax:
+        type: number
+        format: double
+        minimum: 0.00
+        maximum: 9999999.99
+      orderSubtotal:
+        type: number
+        format: double
+        minimum: 0.00
+        maximum: 9999999.99
+      orderTotal:
+        type: number
+        format: double
+        minimum: 0.00
+        maximum: 9999999.99
+  address:
+    required:
+    - firstName
+    - lastName
+    - address1
+    - city
+    - state
+    - postalCode
+    - countryCode
+    properties:
+      firstName:
+        type: string
+        maxLength: 30
+      lastName:
+        type: string
+        maxLength: 30
+      address1:
+        type: string
+        maxLength: 40
+      address2:
+        type: string
+        maxLength: 40
+      address3:
+        type: string
+        maxLength: 40
+      city:
+        type: string
+        maxLength: 40
+      state:
+        type: string
+        maxLength: 2
+      postalCode:
+        type: string
+      countryCode:
+        type: string
+      phoneNumber:
+        type: string
+      email:
+        type: string
+        maxLength: 50
+  shipping:
+    required:
+    - shipService
+    properties:
+      shipService:
+        type: string
+        maxLength: 40
+      requestedWarehouse:
+        type: string
+        enum: [ARD,FHR,COH,SCI]  
+  products:
+    type: array
+    items: 
+      $ref: '#/definitions/productCode'
+  productsView:
+    type: array
+    items: 
+      $ref: '#/definitions/productCodeView'      
+  productCode:
+      type: object
+      required:
+      - productCode
+      - qty
+      properties:
+        productCode:
+          type: string
+          maxLength: 25
+        productName:
+          type: string
+          maxLength: 50
+        qty:
+          type: integer
+          maxLength: 4
+        unitPrice:
+          type: number
+          format: double
+          minimum: 0.00
+          maximum: 9999999.99
+        omsLineNumber:
+          type: string
+          maxLength: 5
+        components:
+          type: array
+          items:
+            $ref: '#/definitions/components'
+  productCodeView:
+      type: object
+      required:
+      - productCode
+      - qty
+      properties:
+        productCode:
+          type: string
+          maxLength: 25
+        productName:
+          type: string
+          maxLength: 50
+        qty:
+          type: integer
+          maxLength: 4
+        unitPrice:
+          type: number
+          format: double
+          minimum: 0.00
+          maximum: 9999999.99
+        omsLineNumber:
+          type: string
+          maxLength: 5
+        productAvailability:
+          type: string
+          enum: ['OutOfStock','InStock']
+        lotNumber: 
+          type: string
+        components:
+          type: array
+          items:
+            $ref: '#/definitions/componentView'            
+  components:
+    type: object
+    required:
+    - component
+    - componentQty
+    properties:
+      component:
+        type: string
+        maxLength: 25
+      componentName:
+        type: string
+        maxLength: 50
+      componentQty:
+        type: integer
+        maxLength: 4
+      componentUnitPrice:
+        type: string
+        format: double
+        minimum: 0.00
+        maximum: 9999999.99
+      omsLineNumber:
+        type: string
+        maxLength: 5
+  componentView:
+    type: object
+    required:
+    - component
+    - componentQty
+    properties:
+      component:
+        type: string
+        maxLength: 25
+      componentName:
+        type: string
+        maxLength: 50
+      componentQty:
+        type: integer
+        maxLength: 4
+      componentUnitPrice:
+        type: string
+        format: double
+        minimum: 0.00
+        maximum: 9999999.99
+      omsLineNumber:
+        type: string
+        maxLength: 5
+      componentAvailability: 
+        type: string
+        enum: ['OutOfStock','InStock']
+      lotNumber: 
+        type: string        
+  messaging:
+      type: object
+      required:
+      - message
+      properties:
+        message:
+          type: string
+          maxLength: 300
+        messageTo:
+          type: string
+          maxLength: 40
+        messageFrom:
+          type: string
+          maxLength: 40
+  shipmentOptions:
+    type: array
+    items:
+      $ref: '#/definitions/option' 
+  option:
+    type: object
+    required:
+    - type
+    - key
+    - value
+    properties:
+      type:
+        type: string
+        maxLength: 50
+      key:
+        type: string
+        maxLength: 50
+      value:
+        type: string
+        maxLength: 20
+  customOptions:
+    type: array
+    items:
+      $ref: '#/definitions/option'   
+  shipmentStatus:
+      type: object
+      required:
+      - orderNumber
+      - status
+      - statusDate
+      properties:
+        clientId:
+          type: string
+          minLength: 3
+          maxLength: 3
+        brandId:
+          type: string
+          minLength: 2
+          maxLength: 2
+        customerNumber:
+          type: string
+          maxLength: 20
+        orderNumber:
+          type: string
+          maxLength: 30
+        shipmentNumber:
+          type: string
+          maxLength: 20
+        referenceId:
+          type: string
+          maxLength: 20   
+        status:
+          type: string
+        fulfilledWarehouse:
+          type: string
+        requestedWarehouse:
+          type: string
+        statusDate:
+          type: string
+          format: date-time
+          maxLength: 40
+        shipService: # only used when status is Shipped
+          type: string
+          enum: [STANDARD, OVERNIGHT, TWODAY, THREEDAY]
+        shipServiceCode: # only used when status is Shipped
+          type: string
+        trackingNumber: # only used when status is Shipped
+          type: string       
+        reasonCode: # only used when status is voided
+          type: string
+          enum: [ItemOutOfStock, InvalidAddress, SuspectedFraud, InvalidShipLines]
+        products:
+          type: array
+          items: 
+            $ref: '#/definitions/productsView'
+  shipmentStatusList:
+      type: object
+      required:
+      - shipments
+      properties:
+        startDate:
+          type: string
+          format: date
+        endDate:
+          type: string
+          format: date
+        shipments:
+          type: array
+          items:
+            $ref: '#/definitions/shipment'
+        pagination:
+          type: object
+          required:
+          - currentPage
+          - from
+          - lastPage
+          - perPage
+          - total
+          properties:
+            currentPage:
+              type: integer
+            from:
+              type: integer
+            lastPage:
+              type: integer
+            perPage:
+              type: integer
+            total:
+              type: integer    
+  shipment:
+    type: object
+    properties:
+      customerNumber:
+        type: string
+        maxLength: 20
+      orderNumber:
+        type: string
+        maxLength: 30
+      shipmentNumber:
+        type: string
+        maxLength: 20
+      referenceId:
+        type: string
+        maxLength: 20   
+      status:
+        type: string
+      receivedDate:
+        type: string
+        format: date
+      shippedDate:
+        type: string
+        format: date
+      returnDate:
+        type: string
+        format: date
+      voidedDate:
+        type: string
+        format: date
+      reasonCode: # only used when status is voided
+        type: string
+        enum: [ItemOutOfStock, InvalidAddress, SuspectedFraud, InvalidShipLines]  
+      lastStatusUpdate:
+        type: string
+        format: date-time
+        maxLength: 40
+      fulfilledWarehouse:
+        type: string
+      requestedWarehouse:
+        type: string
+      shipService: # only used when status is Shipped
+        type: string
+        enum: [STANDARD, OVERNIGHT, TWODAY, THREEDAY]
+      shipServiceCode: # only used when status is Shipped
+        type: string
+      trackingNumber: # only used when status is Shipped
+        type: string
+      products:
+        type: array
+        items: 
+          $ref: '#/definitions/productCode'
+  stats:
+    type: object
+    properties:
+      startDate:
+        type: string
+        format: date
+      endDate:
+        type: string
+        format: date
+      totalOrders: #sum of all order numbers within date range
+        type: number
+      totalShipments: #sum of all shipment ids within date range
+        type: number
+      received: # sum of all shipments that have not started processing within the system
+        type: number
+      processing: # sum of all shipments that processing has started
+        type: number
+      #warehouse: # sum of all shipments that have been sent to warehouses
+        #type: number
+      shipped: # sum of all shipments that have been shipped frmo warehouse
+        type: number
+      #delivered: # sum of all shipments that have been marked delivered by carriers
+        #type: number
+      voided: #sum of all shipments in voided status
+        type: number
+      onTimeShipping: # current calcuation: (total in shipped status in date range  ) / (total shipments in date range )) Date range is the DB's created_date
+        type: number
+        format: double
+      statusByDate:
+        type: array
+        items:
+          $ref: '#/definitions/status'
+  status:
+    type: object
+    properties:
+      date:
+        type: string
+        format: date
+      totalOrders:
+        type: number
+      totalShipments:
+        type: number
+      received:
+        type: number
+      processing:
+        type: number
+      #inWarehouse:
+        #type: number
+      shipped:
+        type: number
+      #delivered:
+        #type: number
+      voided:
+        type: number  
+  carriers:
+    type: object
+    properties:
+      startDate:
+        type: string
+        format: date
+      endDate:
+        type: string
+        format: date
+      carriers:
+        type: array
+        items:
+          $ref: '#/definitions/carrier'
+  carrier:
+    type: object
+    properties:
+      carrierName:
+        type: string
+      totalShipments:
+        type: number
+      serviceMethods:
+        type: array
+        items:
+          $ref: '#/definitions/serviceMethod'
+  serviceMethod:
+    type: object
+    properties:
+      serviceName:
+        type: string
+      totalShipments:
+        type: number
+# Added by API Auto Mocking Plugin
+host: virtserver.swaggerhub.com
+# basePath: /OceanX6/Shipments/1.0.0
+schemes:
+ - https
+# Added by API Auto Mocking Plugin
+basePath: /OceanX6/shipmentRequest/1.0.0
