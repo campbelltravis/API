@@ -3,7 +3,7 @@ info:
   description: Request fulfillment of a shipment and status
   version: "1.1.0" # Created new endpoints for shipment UI, Stats by shpments, and stats by carriers
   title: Shipment Request API
-  # put the contact info for your development or API team
+  # put the contact info for your development or API team test
   contact:
     email: you@your-company.com
 
